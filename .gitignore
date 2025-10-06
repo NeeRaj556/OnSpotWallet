@@ -1,0 +1,181 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+application/.dart_tool/
+application/.flutter-plugins
+application/.flutter-plugins-dependencies
+application/.flutter-plugins-dependencies-web
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.flutter-plugins-dependencies-web
+.pub-cache/
+.pub/
+application/build/
+/build/
+**/.packages
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# Web related
+application/lib/generated_plugin_registrant.dart
+lib/generated_plugin_registrant.dart
+
+# Symbolication related
+application/app.*.symbols
+app.*.symbols
+
+# Obfuscation related
+application/app.*.map.json
+app.*.map.json
+
+# Android Studio will place build artifacts here
+application/android/app/debug
+application/android/app/profile
+application/android/app/release
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Additional Android build files
+application/android/.gradle/
+application/android/captures/
+application/android/gradlew
+application/android/gradlew.bat
+application/android/local.properties
+application/android/app/src/main/kotlin/
+/android/.gradle/
+/android/captures/
+/android/gradlew
+/android/gradlew.bat
+/android/local.properties
+/android/app/src/main/kotlin/
+
+# iOS related
+application/ios/Flutter/flutter_export_environment.sh
+application/ios/Runner/GeneratedPluginRegistrant.*
+application/ios/Flutter/Generated.xcconfig
+application/ios/.symlinks/
+application/ios/Pods/
+application/ios/.generated/
+/ios/Flutter/flutter_export_environment.sh
+/ios/Runner/GeneratedPluginRegistrant.*
+/ios/Flutter/Generated.xcconfig
+/ios/.symlinks/
+/ios/Pods/
+/ios/.generated/
+
+# macOS related
+application/macos/Flutter/GeneratedPluginRegistrant.swift
+application/macos/Flutter/flutter_export_environment.sh
+/macos/Flutter/GeneratedPluginRegistrant.swift
+/macos/Flutter/flutter_export_environment.sh
+
+# Linux related
+application/linux/flutter/generated_plugin_registrant.cc
+application/linux/flutter/generated_plugin_registrant.h
+application/linux/flutter/generated_plugins.cmake
+/linux/flutter/generated_plugin_registrant.cc
+/linux/flutter/generated_plugin_registrant.h
+/linux/flutter/generated_plugins.cmake
+
+# Windows related
+application/windows/flutter/generated_plugin_registrant.cc
+application/windows/flutter/generated_plugin_registrant.h
+application/windows/flutter/generated_plugins.cmake
+/windows/flutter/generated_plugin_registrant.cc
+/windows/flutter/generated_plugin_registrant.h
+/windows/flutter/generated_plugins.cmake
+
+# Coverage
+coverage/
+lcov.info
+
+# Exceptions to above rules.
+!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+!/dev/ci/**/Gemfile.lock
+
+# FVM Version Cache
+.fvm/
+
+# Application specific
+# Save state files
+*.sav
+application/savedstate.sav
+savedstate.sav
+
+# Local configuration files
+*.local
+application/*.local
+
+# Logs and debug files
+*.log
+application/*.log
+debug.log
+crash.log
+application/debug.log
+application/crash.log
+
+# Platform specific build files
+**/.android/
+**/.ios/
+**/.web/
+**/.windows/
+**/.macos/
+**/.linux/
+application/.android/
+application/.ios/
+application/.web/
+application/.windows/
+application/.macos/
+application/.linux/
+
+# Native compilation files
+**/*.so
+**/*.dylib
+**/*.dll
+**/*.a
+application/**/*.so
+application/**/*.dylib
+application/**/*.dll
+application/**/*.a
+
+# Test coverage
+test_coverage/
+application/test_coverage/
+coverage_badge.svg
+application/coverage_badge.svg
+
+# Firebase config (add these if you use Firebase)
+# ios/Runner/GoogleService-Info.plist
+# android/app/google-services.json
+
+# Environment variables
+.env
+.env.local
+.env.production

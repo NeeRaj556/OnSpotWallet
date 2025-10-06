@@ -40,7 +40,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                _isConfirming 
+                _isConfirming
                     ? 'Re-enter your PIN to confirm'
                     : 'This PIN will be used for secure access',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -199,7 +199,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
       // Save PIN to shared preferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_pin', _pin);
-      
+
       // Show success message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

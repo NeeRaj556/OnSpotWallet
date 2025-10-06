@@ -90,10 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _userName,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 24),
                       Text(
@@ -105,10 +106,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(height: 8),
                       Text(
                         '\$${_balance.toStringAsFixed(2)}',
-                        style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                     ],
                   ),
@@ -377,7 +379,8 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                          const Icon(Icons.check_circle,
+                              color: Colors.green, size: 48),
                           const SizedBox(height: 8),
                           Text(
                             'Scanned: $scannedData',
@@ -412,12 +415,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   @override
+  @override
   void dispose() {
     controller?.dispose();
     super.dispose();
-  }
-}
-      ),
-    );
   }
 }

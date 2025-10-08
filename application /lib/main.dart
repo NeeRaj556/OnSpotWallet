@@ -7,6 +7,7 @@ import 'app/config/size_config.dart';
 import 'app/enum/enum.dart';
 import 'app/providers/app_providers.dart';
 import 'app/routes/app_routes.dart';
+import 'app/theme/neon_theme.dart';
 import 'core/notifiers/theme/theme_notifiers.dart';
 import 'init.dart';
 
@@ -29,13 +30,10 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             title: AppConstant.appName,
             routerConfig: router,
-            theme: FlexThemeData.light(scheme: FlexScheme.brandBlue),
-            darkTheme: FlexThemeData.dark(scheme: FlexScheme.brandBlue),
-            themeMode: switch (themeNotifier.themeMode) {
-              AppThemeMode.light => ThemeMode.light,
-              AppThemeMode.dark => ThemeMode.dark,
-              AppThemeMode.system => ThemeMode.system,
-            },
+            // Use Neon Blue Theme
+            theme: NeonBlueTheme.lightTheme,
+            darkTheme: NeonBlueTheme.lightTheme, // Keep neon for dark mode too
+            themeMode: ThemeMode.light, // Always use light with neon theme
           );
         },
       ),

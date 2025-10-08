@@ -16,7 +16,13 @@ class ConnectivityService {
   }
 
   Future<bool> isConnected() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    return true;
+    await Connectivity().checkConnectivity();
+    // Check connectivity result
+    // if (connectivityResult == ConnectivityResult.mobile) {
+    //   return true;
+    // } else if (connectivityResult == ConnectivityResult.wifi) {
+    //   return true;
+    // }
+    return false;
   }
 }

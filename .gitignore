@@ -1,231 +1,166 @@
-# Miscellaneous
+# -----------------------------
+# GLOBAL & OS / EDITOR FILES
+# -----------------------------
 *.class
 *.log
 *.pyc
 *.swp
-.DS_Store
-.atom/
-.build/
-.buildlog/
-.history
+*.swo
+*.sav
+*.DS_Store
+*.local
+*.pid
+*.pid.lock
+*.seed
+*.pids
+*.coverage/
+*.cache
+*.parcel-cache
+*.npm
+*.tgz
+*.node_repl_history
+*.yarn-integrity
+*.npm-debug.log*
+*.yarn-debug.log*
+*.yarn-error.log*
+*.idea/
+*.vscode/
+*.history
+*.buildlog/
+*.build/
+*.atom/
 .svn/
-.swiftpm/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
-application/.dart_tool/
-application/.flutter-plugins
-application/.flutter-plugins-dependencies
-application/.flutter-plugins-dependencies-web
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.flutter-plugins-dependencies-web
-.pub-cache/
-.pub/
-application/build/
-/build/
-**/.packages
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
-
-# Web related
-application/lib/generated_plugin_registrant.dart
-lib/generated_plugin_registrant.dart
-
-# Symbolication related
-application/app.*.symbols
-app.*.symbols
-
-# Obfuscation related
-application/app.*.map.json
-app.*.map.json
-
-# Android Studio will place build artifacts here
-application/android/app/debug
-application/android/app/profile
-application/android/app/release
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Additional Android build files
-application/android/.gradle/
-application/android/captures/
-application/android/gradlew
-application/android/gradlew.bat
-application/android/local.properties
-application/android/app/src/main/kotlin/
-/android/.gradle/
-/android/captures/
-/android/gradlew
-/android/gradlew.bat
-/android/local.properties
-/android/app/src/main/kotlin/
-
-# iOS related
-application/ios/Flutter/flutter_export_environment.sh
-application/ios/Runner/GeneratedPluginRegistrant.*
-application/ios/Flutter/Generated.xcconfig
-application/ios/.symlinks/
-application/ios/Pods/
-application/ios/.generated/
-/ios/Flutter/flutter_export_environment.sh
-/ios/Runner/GeneratedPluginRegistrant.*
-/ios/Flutter/Generated.xcconfig
-/ios/.symlinks/
-/ios/Pods/
-/ios/.generated/
-
-# macOS related
-application/macos/Flutter/GeneratedPluginRegistrant.swift
-application/macos/Flutter/flutter_export_environment.sh
-/macos/Flutter/GeneratedPluginRegistrant.swift
-/macos/Flutter/flutter_export_environment.sh
-
-# Linux related
-application/linux/flutter/generated_plugin_registrant.cc
-application/linux/flutter/generated_plugin_registrant.h
-application/linux/flutter/generated_plugins.cmake
-/linux/flutter/generated_plugin_registrant.cc
-/linux/flutter/generated_plugin_registrant.h
-/linux/flutter/generated_plugins.cmake
-
-# Windows related
-application/windows/flutter/generated_plugin_registrant.cc
-application/windows/flutter/generated_plugin_registrant.h
-application/windows/flutter/generated_plugins.cmake
-/windows/flutter/generated_plugin_registrant.cc
-/windows/flutter/generated_plugin_registrant.h
-/windows/flutter/generated_plugins.cmake
-
-# Coverage
+.fvm/
+.migrate_working_dir/
 coverage/
 lcov.info
+coverage_badge.svg
 
-# Exceptions to above rules.
-!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
-!/dev/ci/**/Gemfile.lock
+# -----------------------------
+# ENVIRONMENT VARIABLES
+# -----------------------------
+.env
+.env.*
+!.env.example
 
-# FVM Version Cache
-.fvm/
+# -----------------------------
+# GLOBAL DEPENDENCY CACHES
+# -----------------------------
+node_modules/
+.pub-cache/
+.pub/
+.dart_tool/
 
-# Application specific
-# Save state files
-*.sav
-application/savedstate.sav
-savedstate.sav
-
-# Local configuration files
-*.local
-application/*.local
-
-# Logs and debug files
-*.log
-application/*.log
-debug.log
-crash.log
-application/debug.log
-application/crash.log
-
-# Platform specific build files
+# -----------------------------
+# BUILD OUTPUTS (any project)
+# -----------------------------
+build/
+dist/
+out/
+temp/
+tmp/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.flutter-plugins-dependencies-web
 **/.android/
 **/.ios/
 **/.web/
 **/.windows/
 **/.macos/
 **/.linux/
-application/.android/
-application/.ios/
-application/.web/
-application/.windows/
-application/.macos/
-application/.linux/
-
-# Native compilation files
 **/*.so
 **/*.dylib
 **/*.dll
 **/*.a
-application/**/*.so
-application/**/*.dylib
-application/**/*.dll
-application/**/*.a
 
-# Test coverage
-test_coverage/
+# -----------------------------
+# FLUTTER APPLICATION
+# -----------------------------
+# Generated Plugin Registrants
+application/lib/generated_plugin_registrant.dart
+application/**/generated_plugin_registrant.*
+application/**/GeneratedPluginRegistrant.*
+
+# Flutter Build Files
+application/.dart_tool/
+application/build/
+application/.flutter-plugins*
+application/.pub-cache/
+application/.pub/
+application/coverage/
 application/test_coverage/
-coverage_badge.svg
-application/coverage_badge.svg
+application/savedstate.sav
+application/debug.log
+application/crash.log
+application/*.local
 
-# Firebase config (add these if you use Firebase)
-# ios/Runner/GoogleService-Info.plist
-# android/app/google-services.json
+# iOS
+application/ios/Flutter/flutter_export_environment.sh
+application/ios/Runner/GeneratedPluginRegistrant.*
+application/ios/Flutter/Generated.xcconfig
+application/ios/.symlinks/
+application/ios/Pods/
+application/ios/.generated/
+application/ios/.last_build_id
 
-# Environment variables
-.env
-.env.local
-.env.production
+# Android
+application/android/.gradle/
+application/android/captures/
+application/android/gradlew*
+application/android/local.properties
+application/android/app/debug
+application/android/app/profile
+application/android/app/release
+application/android/app/src/main/kotlin/
 
+# macOS
+application/macos/Flutter/GeneratedPluginRegistrant.swift
+application/macos/Flutter/flutter_export_environment.sh
 
-// react gitignore 
-# Dependencies
+# Windows
+application/windows/flutter/generated_plugin_registrant.*
+application/windows/flutter/generated_plugins.cmake
+
+# Linux
+application/linux/flutter/generated_plugin_registrant.*
+application/linux/flutter/generated_plugins.cmake
+
+# -----------------------------
+# BACKEND (Node.js)
+# -----------------------------
+backend/node_modules/
+backend/logs/
+backend/debug.log
+backend/error.log
+backend/*.local
+backend/.env
+backend/.env.*
+backend/coverage/
+backend/.nyc_output/
+backend/dist/
+backend/build/
+
+# -----------------------------
+# FRONTEND (React)
+# -----------------------------
 frontend/node_modules/
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/.env
+frontend/.env.*
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+frontend/.env.test.local
+frontend/build/
+frontend/dist/
+frontend/coverage/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
 
-# Production
-frontend//build
 
-# Misc
-*.DS_Store
-*.env.local
-*.env.development.local
-*.env.test.local
-*.env.production.local
-*.npm-debug.log*
-*.yarn-debug.log*
-*.yarn-error.log*
-
-# Runtime data
-*.pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-*.coverage/
-
-# nyc test coverage
-*.nyc_output
-
-# Optional npm cache directory
-*.npm
-
-# Optional REPL history
-*.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-*.yarn-integrity
-
-# dotenv environment variables file
-*.env
-
-# parcel-bundler cache (https://parceljs.org/)
-*.cache
-*.parcel-cache
-
+!/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+!/dev/ci/**/Gemfile.lock

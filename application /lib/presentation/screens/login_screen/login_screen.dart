@@ -31,10 +31,38 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(
-                    Icons.account_balance_wallet,
-                    size: 100,
-                    color: Theme.of(context).colorScheme.primary,
+                  // OnSpot Logo
+                  Center(
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        'assets/images/logo.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.account_balance_wallet,
+                            size: 60,
+                            color: Theme.of(context).colorScheme.primary,
+                          );
+                        },
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 32),
                   Text(

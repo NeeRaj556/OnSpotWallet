@@ -6,6 +6,7 @@ import 'app/providers/app_providers.dart';
 import 'app/routes/app_routes.dart';
 import 'app/theme/neon_theme.dart';
 import 'core/notifiers/theme/theme_notifiers.dart';
+import 'core/widgets/bluetooth_guard.dart';
 import 'init.dart';
 
 void main() async {
@@ -19,20 +20,23 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return MultiProvider(
-      providers: AppProvider.providers,
-      child: Consumer<ThemeNotifier>(
-        builder: (context, themeNotifier, child) {
-          return MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            title: AppConstant.appName,
-            routerConfig: router,
-            // Use Neon Blue Theme
-            theme: NeonBlueTheme.lightTheme,
-            darkTheme: NeonBlueTheme.lightTheme, // Keep neon for dark mode too
-            themeMode: ThemeMode.light, // Always use light with neon theme
-          );
-        },
+    return BluetoothGuard(
+      child: MultiProvider(
+        providers: AppProvider.providers,
+        child: Consumer<ThemeNotifier>(
+          builder: (context, themeNotifier, child) {
+            return MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              title: AppConstant.appName,
+              routerConfig: router,
+              // Use Neon Blue Theme
+              theme: NeonBlueTheme.lightTheme,
+              darkTheme:
+                  NeonBlueTheme.lightTheme, // Keep neon for dark mode too
+              themeMode: ThemeMode.light, // Always use light with neon theme
+            );
+          },
+        ),
       ),
     );
   }

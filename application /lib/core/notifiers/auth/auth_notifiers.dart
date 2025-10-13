@@ -7,22 +7,44 @@ class AuthNotifiers extends ChangeNotifier {
 
   AuthState _state = const AuthState();
   bool get isLoading => _state.isLoading;
-  void login(String email, String password) {
+  Future<void> login(String email, String password) async {
     _updateState(isLoading: true);
-    _authApi.login(email, password);
-    _updateState(isLoading: false, isLoggedIn: true);
+    try {
+      final user = await _authApi.login(email, password);
+      if (user != null) {
+        _updateState(isLoading: false, isLoggedIn: true);
+      } else {
+        _updateState(isLoading: false, error: 'Login failed');
+      }
+    } catch (e) {
+      _updateState(isLoading: false, error: e.toString());
+    }
   }
 
-  void logout() {
+  Future<void> logout() async {
     _updateState(isLoading: true);
-    _authApi.logout();
-    _updateState(isLoading: false, isLoggedIn: false);
+    try {
+      await _authApi.logout();
+      _updateState(isLoading: false, isLoggedIn: false);
+    } catch (e) {
+      _updateState(isLoading: false, error: e.toString());
+    }
   }
 
-  void register(String email, String password) {
+  Future<void> register(
+      String name, String email, String password, String phone) async {
     _updateState(isLoading: true);
-    _authApi.register(email, password);
-    _updateState(isLoading: false, isLoggedIn: true);
+    try {
+      await _authApi.register(
+        name: name,
+        email: email,
+        password: password,
+        phone: phone,
+      );
+      _updateState(isLoading: false, isLoggedIn: true);
+    } catch (e) {
+      _updateState(isLoading: false, error: e.toString());
+    }
   }
 
   void _updateState({

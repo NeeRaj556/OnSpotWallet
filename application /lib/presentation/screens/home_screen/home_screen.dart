@@ -8,6 +8,7 @@ import 'package:audioplayers/audioplayers.dart';
 import '../../../services/crypto_service.dart';
 import '../../../services/ble_service.dart';
 import '../../../services/gateway_service.dart';
+import '../../../models/user_model.dart';
 import '../../../models/token_model.dart';
 import '../../../models/payment_category.dart';
 import '../../../app/theme/neon_theme.dart';
@@ -25,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _userName = 'User';
   String _userEmail = '';
   String _deviceId = '';
-  double _balance = 100.0; // Start with $100
+  double _balance = 1000.0; // Demo balance (matches mockUser)
   bool _isLoading = true;
   bool _isOnline = false; // Track online/offline status
   bool _isBalanceVisible = false; // Balance visibility toggle
@@ -238,9 +239,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
-        backgroundColor: NeonBlueTheme.offWhite,
-        body: Center(
+      return Container(
+        color: NeonBlueTheme.offWhite,
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -265,50 +266,48 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: NeonBlueTheme.offWhite,
-      extendBody: true,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            // Main content
-            SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: 120, // Space for floating button
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Balance Card with Visibility Toggle
-                  _buildNeonBalanceCard(),
-                  const SizedBox(height: 24),
-
-                  // Payment Categories Grid
-                  _buildPaymentCategories(),
-                  const SizedBox(height: 24),
-
-                  // Recent Transaction History (if any)
-                  if (_transactions.isNotEmpty) ...[
-                    _buildNeonTransactionHistory(),
-                    const SizedBox(height: 20),
-                  ],
-                ],
-              ),
+    return Container(
+      color: NeonBlueTheme.offWhite,
+      child: Stack(
+        children: [
+          // Main content
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: 120, // Space for floating button
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Balance Card with Visibility Toggle
+                _buildNeonBalanceCard(),
+                const SizedBox(height: 24),
 
-            // Animated Floating QR Button
-            _buildAnimatedQRButton(),
-          ],
-        ),
+                // Payment Categories Grid
+                _buildPaymentCategories(),
+                const SizedBox(height: 24),
+
+                // Recent Transaction History (if any)
+                if (_transactions.isNotEmpty) ...[
+                  _buildNeonTransactionHistory(),
+                  const SizedBox(height: 20),
+                ],
+              ],
+            ),
+          ),
+
+          // Removed duplicate QR button - using the one in bottom nav
+        ],
       ),
     );
   }
 
   // Neon Balance Card with Gradient and Visibility Toggle
   Widget _buildNeonBalanceCard() {
+    final user = UserModel.mockUser; // Get user data
+
     return Container(
       decoration: BoxDecoration(
         gradient: NeonBlueTheme.neonGradient,
@@ -319,15 +318,32 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Greeting Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Balance',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Hello,',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    Text(
+                      user.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
               Row(
@@ -353,56 +369,108 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: _loadBalance,
                     iconSize: 20,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.white),
-                    onPressed: _handleLogout,
-                    iconSize: 20,
-                  ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 16),
+
+          // Balance Label
+          const Text(
+            'Available Balance',
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 4),
+
+          // Balance Amount
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               colors: [Colors.white, Colors.white70],
             ).createShader(bounds),
             child: Text(
-              _isBalanceVisible ? '\$${_balance.toStringAsFixed(2)}' : 'XXXXX',
+              _isBalanceVisible
+                  ? '${user.currency}${user.balance.toStringAsFixed(2)}'
+                  : 'XXXXX',
               style: const TextStyle(
-                fontSize: 56,
+                fontSize: 48,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                letterSpacing: -2,
+                letterSpacing: -1.5,
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _isOnline ? Icons.wifi : Icons.wifi_off,
-                  color: Colors.white,
-                  size: 16,
+          const SizedBox(height: 16),
+
+          // Status and Limit Row
+          Row(
+            children: [
+              // Online/Offline Status
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  _isOnline ? 'ONLINE' : 'OFFLINE',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _isOnline ? Icons.wifi : Icons.wifi_off,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _isOnline ? 'ONLINE' : 'OFFLINE',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+
+              // Transaction Limit
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.3),
+                    width: 1,
                   ),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.credit_card,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Limit: ${user.currency}${_isOnline ? user.onlineLimit.toStringAsFixed(0) : user.offlineLimit.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

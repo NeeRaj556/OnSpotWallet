@@ -1,0 +1,8 @@
+Please save the OnSpot Wallet logo image as:
+- logo.png (for general use)
+- logo_icon.png (for app icon)
+
+Place them in this directory:
+/home/btwneeraj/Desktop/Projects/OnSpotWallet/application /assets/images/
+
+The logo should be a transparent PNG format.

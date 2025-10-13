@@ -1,3 +1,3 @@
 abstract class AppConstant {
-  static const String appName = "Flutter Starter Kit";
+  static const String appName = "OnSpot Wallet";
 }

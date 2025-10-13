@@ -140,9 +140,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = true;
+        });
+      }
 
       // Simulate API call
       await Future.delayed(const Duration(seconds: 1));
@@ -159,11 +161,11 @@ class _LoginScreenState extends State<LoginScreen> {
         // Check if PIN exists
         final pin = prefs.getString('user_pin');
 
-        setState(() {
-          _isLoading = false;
-        });
-
         if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
           if (pin == null || pin.isEmpty) {
             // Navigate to PIN setup
             context.go('/pin-setup');
@@ -173,11 +175,11 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         }
       } else {
-        setState(() {
-          _isLoading = false;
-        });
-
         if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Invalid email or password'),
@@ -190,9 +192,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleDemoLogin() async {
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+      });
+    }
 
     // Simulate loading
     await Future.delayed(const Duration(milliseconds: 500));
@@ -207,11 +211,11 @@ class _LoginScreenState extends State<LoginScreen> {
     // Check if PIN exists
     final pin = prefs.getString('user_pin');
 
-    setState(() {
-      _isLoading = false;
-    });
-
     if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+
       if (pin == null || pin.isEmpty) {
         // Navigate to PIN setup
         context.go('/pin-setup');

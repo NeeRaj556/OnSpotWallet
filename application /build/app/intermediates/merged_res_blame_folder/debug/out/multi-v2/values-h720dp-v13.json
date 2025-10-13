@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.flutter_starter_kit.app-mergeDebugResources-38:/values-h720dp-v13/values-h720dp-v13.xml",
+            "outputFile": "com.example.flutter_starter_kit.app-mergeDebugResources-43:/values-h720dp-v13/values-h720dp-v13.xml",
             "map": [
                 {
                     "source": "/home/btwneeraj/.gradle/caches/transforms-3/c029d973be620a8c27af21475e044d05/transformed/appcompat-1.1.0/res/values-h720dp-v13/values-h720dp-v13.xml",

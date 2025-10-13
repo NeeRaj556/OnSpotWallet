@@ -1,10 +1,7 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_starter_kit/app/const/app_constant.dart';
 import 'package:provider/provider.dart';
-
+import 'app/const/app_constant.dart';
 import 'app/config/size_config.dart';
-import 'app/enum/enum.dart';
 import 'app/providers/app_providers.dart';
 import 'app/routes/app_routes.dart';
 import 'app/theme/neon_theme.dart';

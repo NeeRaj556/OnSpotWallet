@@ -3,12 +3,14 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:convert';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:audioplayers/audioplayers.dart';
 import '../../../services/crypto_service.dart';
 import '../../../services/ble_service.dart';
 import '../../../services/gateway_service.dart';
 import '../../../models/token_model.dart';
+import '../../../models/payment_category.dart';
+import '../../../app/theme/neon_theme.dart';
 import '../payment_screen/payment_confirmation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   double _balance = 100.0; // Start with $100
   bool _isLoading = true;
   bool _isOnline = false; // Track online/offline status
+  bool _isBalanceVisible = false; // Balance visibility toggle
 
   // MeshPay services
   late CryptoService _cryptoService;
@@ -235,56 +238,793 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: NeonBlueTheme.offWhite,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  gradient: NeonBlueTheme.neonGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: NeonBlueTheme.neonGlow,
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 3,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('MeshPay Wallet'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.monitor),
-            onPressed: () {
-              // TODO: Navigate to network monitor
-            },
-            tooltip: 'Network Monitor',
+      backgroundColor: NeonBlueTheme.offWhite,
+      extendBody: true,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // Main content
+            SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 120, // Space for floating button
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Balance Card with Visibility Toggle
+                  _buildNeonBalanceCard(),
+                  const SizedBox(height: 24),
+
+                  // Payment Categories Grid
+                  _buildPaymentCategories(),
+                  const SizedBox(height: 24),
+
+                  // Recent Transaction History (if any)
+                  if (_transactions.isNotEmpty) ...[
+                    _buildNeonTransactionHistory(),
+                    const SizedBox(height: 20),
+                  ],
+                ],
+              ),
+            ),
+
+            // Animated Floating QR Button
+            _buildAnimatedQRButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Neon Balance Card with Gradient and Visibility Toggle
+  Widget _buildNeonBalanceCard() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: NeonBlueTheme.neonGradient,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: NeonBlueTheme.neonGlow,
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Balance',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _isBalanceVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (mounted) {
+                        setState(() {
+                          _isBalanceVisible = !_isBalanceVisible;
+                        });
+                      }
+                    },
+                    iconSize: 22,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    onPressed: _loadBalance,
+                    iconSize: 20,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.logout, color: Colors.white),
+                    onPressed: _handleLogout,
+                    iconSize: 20,
+                  ),
+                ],
+              ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleLogout,
+          const SizedBox(height: 8),
+          ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Colors.white, Colors.white70],
+            ).createShader(bounds),
+            child: Text(
+              _isBalanceVisible ? '\$${_balance.toStringAsFixed(2)}' : 'XXXXX',
+              style: const TextStyle(
+                fontSize: 56,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: -2,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _isOnline ? Icons.wifi : Icons.wifi_off,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  _isOnline ? 'ONLINE' : 'OFFLINE',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Device Info Card
-              _buildDeviceInfoCard(),
-              const SizedBox(height: 16),
+    );
+  }
 
-              // Balance Card
-              _buildBalanceCard(),
-              const SizedBox(height: 16),
-
-              // Settings Card
-              _buildSettingsCard(),
-              const SizedBox(height: 16),
-
-              // Action Buttons
-              _buildActionButtons(),
-              const SizedBox(height: 24),
-
-              // Transaction History
-              _buildTransactionHistory(),
-            ],
+  // Payment Categories Grid
+  Widget _buildPaymentCategories() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            'Services',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: NeonBlueTheme.almostBlack,
+            ),
           ),
         ),
+        const SizedBox(height: 16),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 0.9,
+          ),
+          itemCount: paymentCategories.length,
+          itemBuilder: (context, index) {
+            final category = paymentCategories[index];
+            return _buildCategoryCard(category);
+          },
+        ),
+      ],
+    );
+  }
+
+  // Category Card
+  Widget _buildCategoryCard(PaymentCategory category) {
+    return GestureDetector(
+      onTap: () => _showCategoryServices(category),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: category.gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: category.gradientColors[0].withOpacity(0.3),
+              blurRadius: 12,
+              spreadRadius: 2,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                category.icon,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                category.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Show Category Services Bottom Sheet
+  void _showCategoryServices(PaymentCategory category) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: const EdgeInsets.only(top: 12),
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Header with icon
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: category.gradientColors,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(
+                      category.icon,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    category.title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Services list
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                itemCount: category.services.length,
+                itemBuilder: (context, index) {
+                  final service = category.services[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          // Navigate to service
+                          Navigator.pop(context);
+                          _handleServiceSelection(category, service);
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            color: Colors.grey[50],
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.grey[200]!,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: category.gradientColors
+                                        .map((c) => c.withOpacity(0.2))
+                                        .toList(),
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.payment,
+                                  color: category.gradientColors[0],
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Text(
+                                  service,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.grey[400],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Handle Service Selection
+  void _handleServiceSelection(PaymentCategory category, String service) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Selected: $service from ${category.title}'),
+          backgroundColor: category.gradientColors[0],
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+    // TODO: Navigate to payment screen with service details
+  }
+
+  // Status Badge
+  Widget _buildStatusBadge() {
+    return Container(
+      decoration: NeonBlueTheme.statusBadge(isOnline: _isOnline),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Row(
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(
+              color: _isOnline
+                  ? NeonBlueTheme.neonGreen
+                  : NeonBlueTheme.neonOrange,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: (_isOnline
+                          ? NeonBlueTheme.neonGreen
+                          : NeonBlueTheme.neonOrange)
+                      .withOpacity(0.6),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _isOnline ? 'ONLINE MODE' : 'OFFLINE MODE',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _isOnline ? 'Connected • Max \$1000' : 'BLE Mesh • Max \$10',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.8),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _isOnline ? Icons.wifi : Icons.bluetooth,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                if (_isOnline) ...[
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.bluetooth,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Quick Stats
+  Widget _buildQuickStats() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            decoration: NeonBlueTheme.glassCard(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: NeonBlueTheme.successGradient,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_downward,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '${_transactions.where((t) => t.status == TxStatus.confirmed).length}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: NeonBlueTheme.almostBlack,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Received',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Container(
+            decoration: NeonBlueTheme.glassCard(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: NeonBlueTheme.neonGradient,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_upward,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '0',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: NeonBlueTheme.almostBlack,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Sent',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Neon Transaction History
+  Widget _buildNeonTransactionHistory() {
+    if (_transactions.isEmpty) {
+      return Container(
+        decoration: NeonBlueTheme.glassCard(),
+        padding: const EdgeInsets.all(40),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: NeonBlueTheme.neonBlueLight.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.receipt_long,
+                size: 48,
+                color: NeonBlueTheme.neonBlue.withOpacity(0.5),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No transactions yet',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      decoration: NeonBlueTheme.glassCard(),
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: NeonBlueTheme.neonGradient,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.history,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Recent Transactions',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: NeonBlueTheme.almostBlack,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ..._transactions.take(5).map((tx) => _buildTransactionItem(tx)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionItem(TxRecord tx) {
+    final dollarAmount = tx.token.amount / 100.0;
+    final isReceived = tx.token.to == _deviceId;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: NeonBlueTheme.neonBlue.withOpacity(0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              gradient: isReceived
+                  ? NeonBlueTheme.successGradient
+                  : NeonBlueTheme.neonGradient,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isReceived ? Icons.arrow_downward : Icons.arrow_upward,
+              color: Colors.white,
+              size: 16,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isReceived ? 'Received' : 'Sent',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  tx.createdAt.toString().substring(11, 16),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '${isReceived ? '+' : '-'}\$${dollarAmount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: isReceived
+                      ? NeonBlueTheme.neonGreen
+                      : NeonBlueTheme.neonBlue,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: NeonBlueTheme.neonGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Confirmed',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: NeonBlueTheme.neonGreen,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Animated QR Button with Drop-down Style
+  Widget _buildAnimatedQRButton() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 20,
+      child: Center(
+        child: GestureDetector(
+          onTap: _showQRBottomSheet,
+          child: Container(
+            width: 70,
+            height: 70,
+            decoration: BoxDecoration(
+              gradient: NeonBlueTheme.neonGradient,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: NeonBlueTheme.neonBlue.withOpacity(0.6),
+                  blurRadius: 30,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.qr_code_scanner,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // QR Bottom Sheet
+  void _showQRBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _QRBottomSheet(
+        deviceId: _deviceId,
+        onQRScanned: (qrData) {
+          Navigator.pop(context);
+          _processScannedQR(qrData);
+        },
       ),
     );
   }
@@ -414,91 +1154,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSettingsCard() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'MeshPay Settings',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 12),
-            SwitchListTile(
-              title: const Text('Act as Gateway'),
-              subtitle: const Text('Upload tokens to server when online'),
-              value: _isGatewayMode,
-              onChanged: (value) async {
-                setState(() {
-                  _isGatewayMode = value;
-                });
-                await _gatewayService.setGatewayMode(value);
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('gateway_mode', value);
-              },
-            ),
-            SwitchListTile(
-              title: const Text('Allow Relay'),
-              subtitle: const Text('Relay tokens to other devices'),
-              value: _allowRelay,
-              onChanged: (value) async {
-                setState(() {
-                  _allowRelay = value;
-                });
-                _bleService.setAllowRelay(value);
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setBool('allow_relay', value);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _showGenerateInvoiceDialog,
-                icon: const Icon(Icons.qr_code_2),
-                label: const Text('Generate QR'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: ElevatedButton.icon(
-                onPressed: _scanQRCode,
-                icon: const Icon(Icons.qr_code_scanner),
-                label: const Text('Scan QR'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: _showMyQRCode,
-          icon: const Icon(Icons.account_balance_wallet),
-          label: const Text('My Wallet QR'),
-          style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-          ),
-        ),
-      ],
-    );
+  Future<void> _loadBalance() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _balance = prefs.getDouble('balance') ?? 100.0;
+    });
   }
 
   Widget _buildTransactionHistory() {
@@ -975,8 +1635,9 @@ class _QRScannerScreen extends StatefulWidget {
 }
 
 class _QRScannerScreenState extends State<_QRScannerScreen> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
+  final MobileScannerController controller = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
   bool hasScanned = false;
 
   @override
@@ -985,27 +1646,39 @@ class _QRScannerScreenState extends State<_QRScannerScreen> {
       appBar: AppBar(
         title: const Text('Scan QR Code'),
         backgroundColor: Colors.black87,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: Theme.of(context).colorScheme.primary,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: 300,
-              ),
-            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.flip_camera_ios),
+            onPressed: () => controller.switchCamera(),
           ),
-          Expanded(
-            flex: 1,
+          IconButton(
+            icon: const Icon(Icons.flashlight_on),
+            onPressed: () => controller.toggleTorch(),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          MobileScanner(
+            controller: controller,
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              for (final barcode in barcodes) {
+                if (!hasScanned && barcode.rawValue != null) {
+                  setState(() {
+                    hasScanned = true;
+                  });
+                  Navigator.pop(context, barcode.rawValue);
+                  break;
+                }
+              }
+            },
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
             child: Container(
-              color: Colors.black87,
+              height: 100,
+              color: Colors.black54,
               child: const Center(
                 child: Text(
                   'Align QR code within frame',
@@ -1019,20 +1692,301 @@ class _QRScannerScreenState extends State<_QRScannerScreen> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (!hasScanned && scanData.code != null) {
-        hasScanned = true;
-        controller.pauseCamera();
-        Navigator.pop(context, scanData.code);
-      }
-    });
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+}
+
+// QR Bottom Sheet with Scanner and My QR Toggle
+class _QRBottomSheet extends StatefulWidget {
+  final String deviceId;
+  final Function(String) onQRScanned;
+
+  const _QRBottomSheet({
+    required this.deviceId,
+    required this.onQRScanned,
+  });
+
+  @override
+  State<_QRBottomSheet> createState() => _QRBottomSheetState();
+}
+
+class _QRBottomSheetState extends State<_QRBottomSheet> {
+  bool _showMyQR = false;
+  final MobileScannerController _scannerController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.of(context).size.height * 0.65;
+
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white, NeonBlueTheme.offWhite],
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: NeonBlueTheme.neonBlue.withOpacity(0.3),
+            blurRadius: 30,
+            spreadRadius: 5,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Handle bar with neon glow
+          Container(
+            margin: const EdgeInsets.only(top: 16),
+            width: 50,
+            height: 5,
+            decoration: BoxDecoration(
+              gradient: NeonBlueTheme.neonGradient,
+              borderRadius: BorderRadius.circular(3),
+              boxShadow: [
+                BoxShadow(
+                  color: NeonBlueTheme.neonBlue.withOpacity(0.5),
+                  blurRadius: 10,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Toggle buttons (no text, just icons)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (!_showMyQR) ...[
+                // Camera flip button
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: NeonBlueTheme.softShadow,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.flip_camera_ios),
+                    color: NeonBlueTheme.neonBlue,
+                    onPressed: () => _scannerController.switchCamera(),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                // Torch button
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: NeonBlueTheme.softShadow,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.flashlight_on),
+                    color: NeonBlueTheme.neonOrange,
+                    onPressed: () => _scannerController.toggleTorch(),
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+              // Toggle button (scanner/my QR)
+              Container(
+                decoration: BoxDecoration(
+                  gradient: NeonBlueTheme.neonGradient,
+                  shape: BoxShape.circle,
+                  boxShadow: NeonBlueTheme.neonGlow,
+                ),
+                child: IconButton(
+                  icon: Icon(
+                    _showMyQR ? Icons.qr_code_scanner : Icons.qr_code_2,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _showMyQR = !_showMyQR;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20), // Content area
+          Expanded(
+            child: _showMyQR ? _buildMyQRView() : _buildScannerView(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildScannerView() {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(30),
+            bottomRight: Radius.circular(30),
+          ),
+          child: MobileScanner(
+            controller: _scannerController,
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              for (final barcode in barcodes) {
+                if (barcode.rawValue != null) {
+                  widget.onQRScanned(barcode.rawValue!);
+                  break;
+                }
+              }
+            },
+          ),
+        ),
+        // Scanning frame overlay
+        Center(
+          child: Container(
+            width: 250,
+            height: 250,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: NeonBlueTheme.neonBlue,
+                width: 3,
+              ),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: NeonBlueTheme.neonBlue.withOpacity(0.5),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Stack(
+              children: [
+                // Corner decorations
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      gradient: NeonBlueTheme.neonGradient,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(17),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      gradient: NeonBlueTheme.neonGradient,
+                      borderRadius: const BorderRadius.only(
+                        topRight: Radius.circular(17),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      gradient: NeonBlueTheme.neonGradient,
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(17),
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      gradient: NeonBlueTheme.neonGradient,
+                      borderRadius: const BorderRadius.only(
+                        bottomRight: Radius.circular(17),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMyQRView() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                NeonBlueTheme.neonBlueLight.withOpacity(0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(30),
+            border: Border.all(
+              color: NeonBlueTheme.neonBlue.withOpacity(0.3),
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: NeonBlueTheme.neonBlue.withOpacity(0.3),
+                blurRadius: 30,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: QrImageView(
+            data: widget.deviceId,
+            version: QrVersions.auto,
+            size: 280,
+            backgroundColor: Colors.transparent,
+            eyeStyle: QrEyeStyle(
+              eyeShape: QrEyeShape.square,
+              color: NeonBlueTheme.almostBlack,
+            ),
+            dataModuleStyle: QrDataModuleStyle(
+              dataModuleShape: QrDataModuleShape.square,
+              color: NeonBlueTheme.almostBlack,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
-    controller?.dispose();
+    _scannerController.dispose();
     super.dispose();
   }
 }

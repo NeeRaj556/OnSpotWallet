@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'dart:convert';
 import '../models/token_model.dart';
 
@@ -47,8 +47,9 @@ class QRScannerWidget extends StatefulWidget {
 }
 
 class _QRScannerWidgetState extends State<QRScannerWidget> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
+  final MobileScannerController controller = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
   bool _hasScanned = false;
 
   @override
@@ -58,27 +59,40 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
         title: const Text('Scan QR Code'),
         centerTitle: true,
         backgroundColor: Colors.black87,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            flex: 5,
-            child: QRView(
-              key: qrKey,
-              onQRViewCreated: _onQRViewCreated,
-              overlay: QrScannerOverlayShape(
-                borderColor: Theme.of(context).colorScheme.primary,
-                borderRadius: 10,
-                borderLength: 30,
-                borderWidth: 10,
-                cutOutSize: 300,
-              ),
-            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.flip_camera_ios),
+            onPressed: () => controller.switchCamera(),
           ),
-          Expanded(
-            flex: 1,
+          IconButton(
+            icon: const Icon(Icons.flashlight_on),
+            onPressed: () => controller.toggleTorch(),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          MobileScanner(
+            controller: controller,
+            onDetect: (capture) {
+              final List<Barcode> barcodes = capture.barcodes;
+              for (final barcode in barcodes) {
+                if (!_hasScanned && barcode.rawValue != null) {
+                  setState(() {
+                    _hasScanned = true;
+                  });
+                  widget.onQRScanned(barcode.rawValue!);
+                  Navigator.pop(context);
+                  break;
+                }
+              }
+            },
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
             child: Container(
-              color: Colors.black87,
+              height: 100,
+              color: Colors.black54,
               child: const Center(
                 child: Text(
                   'Align QR code within frame',
@@ -92,21 +106,9 @@ class _QRScannerWidgetState extends State<QRScannerWidget> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (!_hasScanned && scanData.code != null) {
-        _hasScanned = true;
-        controller.pauseCamera();
-        widget.onQRScanned(scanData.code!);
-        Navigator.pop(context);
-      }
-    });
-  }
-
   @override
   void dispose() {
-    controller?.dispose();
+    controller.dispose();
     super.dispose();
   }
 }

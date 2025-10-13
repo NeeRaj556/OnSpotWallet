@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_starter_kit/core/apis/auth_api.dart';
-
+import '../../apis/auth_api.dart';
 import 'auth_state.dart';
 
 class AuthNotifiers extends ChangeNotifier {

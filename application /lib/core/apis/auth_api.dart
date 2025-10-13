@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_starter_kit/app/utils/logger_utils.dart';
-
+import '../../app/utils/logger_utils.dart';
 import '../../app/routes/api_routes.dart';
 import '../../app/services/service_locator.dart';
 

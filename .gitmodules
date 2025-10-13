@@ -1,0 +1,3 @@
+[submodule "OnSpotWallet-backend"]
+	path = OnSpotWallet-backend
+	url = git@github.com:NeeRaj556/OnSpotWallet-backend.git

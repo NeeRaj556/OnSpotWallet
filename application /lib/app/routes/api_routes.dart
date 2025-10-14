@@ -1,12 +1,13 @@
 abstract class ApiRoutes {
-  static const String baseUrl = "http://localhost:3030/api";
+  static const String baseUrl = "https://93h6gxfb-3030.inc1.devtunnels.ms/api";
 
   // Auth routes
-  static const String login = "/login";
-  static const String register = "/register";
-  static const String pinUpdate = "/pinUpdate";
+  static const String login = "/auth/login";
+  static const String register = "/auth/register";
+  static const String pinUpdate = "/auth/pinUpdate";
 
   // User routes
+  static const String userMe = "/user/me";
   static const String userProfile = "/user/profile";
   static const String userBalance = "/user/balance";
   static const String userUpdate = "/user/update";

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -12,6 +13,7 @@ import '../../../models/user_model.dart';
 import '../../../models/token_model.dart';
 import '../../../models/payment_category.dart';
 import '../../../app/theme/neon_theme.dart';
+import '../../../core/notifiers/auth/auth_notifiers.dart';
 import '../payment_screen/payment_confirmation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -121,13 +123,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _userName = prefs.getString('user_name') ?? 'User';
-      _userEmail = prefs.getString('user_email') ?? 'demo@example.com';
-      _balance = prefs.getDouble('meshpay_balance') ?? 1000.0;
-      _isGatewayMode = prefs.getBool('gateway_mode') ?? false;
-      _allowRelay = prefs.getBool('allow_relay') ?? false;
-    });
+
+    // Refresh user data from server if logged in
+    final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+    if (isLoggedIn && mounted) {
+      try {
+        final authNotifier = Provider.of<AuthNotifiers>(context, listen: false);
+        await authNotifier.refreshUserData();
+      } catch (e) {
+        print('Error refreshing user data: $e');
+      }
+    }
+
+    // Load from SharedPreferences (updated by API call above or from login)
+    if (mounted) {
+      setState(() {
+        _userName = prefs.getString('user_name') ?? 'User';
+        _userEmail = prefs.getString('user_email') ?? '';
+        _balance = prefs.getDouble('user_balance') ?? 0.0;
+        _isGatewayMode = prefs.getBool('gateway_mode') ?? false;
+        _allowRelay = prefs.getBool('allow_relay') ?? false;
+      });
+    }
 
     // Apply settings
     if (_isGatewayMode) {
@@ -140,7 +157,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveBalance() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('meshpay_balance', _balance);
+    await prefs.setDouble('user_balance', _balance);
+  }
+
+  // Pull-to-refresh method to fetch latest user data from API
+  Future<void> _refreshUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isLoggedIn = prefs.getBool('is_logged_in') ?? false;
+
+    if (isLoggedIn && mounted) {
+      try {
+        final authNotifier = Provider.of<AuthNotifiers>(context, listen: false);
+        await authNotifier.refreshUserData();
+
+        // Reload data from SharedPreferences after API call
+        if (mounted) {
+          setState(() {
+            _userName = prefs.getString('user_name') ?? 'User';
+            _userEmail = prefs.getString('user_email') ?? '';
+            _balance = prefs.getDouble('user_balance') ?? 0.0;
+          });
+        }
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Data refreshed successfully'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        print('Error refreshing user data: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to refresh data: $e'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
   }
 
   void _handleGatewayEvent(GatewayEvent event) {
@@ -270,31 +331,36 @@ class _HomeScreenState extends State<HomeScreen> {
       color: NeonBlueTheme.offWhite,
       child: Stack(
         children: [
-          // Main content
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
-              top: 20,
-              bottom: 120, // Space for floating button
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Balance Card with Visibility Toggle
-                _buildNeonBalanceCard(),
-                const SizedBox(height: 24),
+          // Main content with pull-to-refresh
+          RefreshIndicator(
+            onRefresh: _refreshUserData,
+            color: const Color(0xFF9333EA), // Deep Purple
+            backgroundColor: Colors.white,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 20,
+                bottom: 120, // Space for floating button
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Balance Card with Visibility Toggle
+                  _buildNeonBalanceCard(),
+                  const SizedBox(height: 24),
 
-                // Payment Categories Grid
-                _buildPaymentCategories(),
-                const SizedBox(height: 24),
+                  // Payment Categories Grid
+                  _buildPaymentCategories(),
+                  const SizedBox(height: 24),
 
-                // Recent Transaction History (if any)
-                if (_transactions.isNotEmpty) ...[
-                  _buildNeonTransactionHistory(),
-                  const SizedBox(height: 20),
+                  // Recent Transaction History (if any)
+                  if (_transactions.isNotEmpty) ...[
+                    _buildNeonTransactionHistory(),
+                    const SizedBox(height: 20),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
 
@@ -460,7 +526,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Limit: ${user.currency}${_isOnline ? user.onlineLimit.toStringAsFixed(0) : user.offlineLimit.toStringAsFixed(0)}',
+                      'Limit: ${UserModel.mockUser.currency}${_isOnline ? UserModel.mockUser.onlineLimit.toStringAsFixed(0) : UserModel.mockUser.offlineLimit.toStringAsFixed(0)}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,

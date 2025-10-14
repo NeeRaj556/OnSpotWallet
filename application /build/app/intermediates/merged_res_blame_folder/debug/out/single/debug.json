@@ -16,16 +16,8 @@
         "source": "com.example.flutter_starter_kit.app-main-40:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-merged_res-45:/mipmap-xhdpi_ic_launcher.png.flat",
-        "source": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-main-40:/mipmap-xhdpi/ic_launcher.png"
-    },
-    {
         "merged": "com.example.flutter_starter_kit.app-merged_res-45:/mipmap-mdpi_ic_launcher.png.flat",
         "source": "com.example.flutter_starter_kit.app-main-40:/mipmap-mdpi/ic_launcher.png"
-    },
-    {
-        "merged": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-merged_res-45:/drawable-v21_launch_background.xml.flat",
-        "source": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-main-40:/drawable-v21/launch_background.xml"
     },
     {
         "merged": "com.example.flutter_starter_kit.app-merged_res-45:/drawable-xhdpi_ic_launcher_foreground.png.flat",
@@ -36,12 +28,8 @@
         "source": "com.example.flutter_starter_kit.app-main-40:/mipmap-xxhdpi/ic_launcher.png"
     },
     {
-        "merged": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-merged_res-45:/mipmap-xxxhdpi_ic_launcher.png.flat",
-        "source": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-main-40:/mipmap-xxxhdpi/ic_launcher.png"
-    },
-    {
-        "merged": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-merged_res-45:/mipmap-mdpi_ic_launcher.png.flat",
-        "source": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-main-40:/mipmap-mdpi/ic_launcher.png"
+        "merged": "com.example.flutter_starter_kit.app-merged_res-45:/drawable-v21_launch_background.xml.flat",
+        "source": "com.example.flutter_starter_kit.app-main-40:/drawable-v21/launch_background.xml"
     },
     {
         "merged": "com.example.flutter_starter_kit.app-merged_res-45:/drawable-xxhdpi_ic_launcher_foreground.png.flat",
@@ -56,15 +44,7 @@
         "source": "com.example.flutter_starter_kit.app-main-40:/mipmap-xhdpi/ic_launcher.png"
     },
     {
-        "merged": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-merged_res-45:/mipmap-xxhdpi_ic_launcher.png.flat",
-        "source": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-main-40:/mipmap-xxhdpi/ic_launcher.png"
-    },
-    {
         "merged": "com.example.flutter_starter_kit.app-merged_res-45:/mipmap-xxxhdpi_ic_launcher.png.flat",
         "source": "com.example.flutter_starter_kit.app-main-40:/mipmap-xxxhdpi/ic_launcher.png"
-    },
-    {
-        "merged": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-merged_res-45:/mipmap-hdpi_ic_launcher.png.flat",
-        "source": "/home/btwneeraj/.gradle/daemon/8.3/com.example.flutter_starter_kit.app-main-40:/mipmap-hdpi/ic_launcher.png"
     }
 ]

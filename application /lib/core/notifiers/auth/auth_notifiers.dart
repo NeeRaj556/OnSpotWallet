@@ -47,6 +47,19 @@ class AuthNotifiers extends ChangeNotifier {
     }
   }
 
+  // Refresh user data from server
+  Future<void> refreshUserData() async {
+    try {
+      final user = await _authApi.getCurrentUser();
+      if (user != null) {
+        // User data updated in SharedPreferences by AuthApi
+        notifyListeners();
+      }
+    } catch (e) {
+      // Silently fail on refresh - user data already in local storage
+    }
+  }
+
   void _updateState({
     bool? isLoading,
     String? error,
